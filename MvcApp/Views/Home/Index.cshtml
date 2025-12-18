@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Search for a product below:</p>
+
+    <!-- Search form -->
+    <form method="get" action="/search">
+        <input type="text" name="q" placeholder="Enter product name" class="form-control" style="max-width: 400px; display: inline-block;" />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+@section Scripts {
+<script type="text/javascript">
+    // Wait for Zync script to finish loading
+    window._zyncReady.then(function() {
+        bt('track', 'viewedHome', {});
+    });
+</script>
+}

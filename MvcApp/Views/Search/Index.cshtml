@@ -1,0 +1,41 @@
+@model IEnumerable<MvcApp.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <ul>
+    @foreach (var product in Model)
+    {
+        <li>
+            <h3>@product.Name</h3>
+            <p>@product.Description</p>
+            <p><strong>Price:</strong> $@product.Price</p>
+            <a href="/product/details/@product.Id">View Details</a>
+        </li>
+    }
+    </ul>
+}
+
+<a href="/search">Back to Search</a>
+
+
+@section Scripts {
+<script type="text/javascript">
+    // Wait for Zync script to finish loading
+    window._zyncReady.then(function() {
+        bt('track', 'searched', {
+            content_type: 'product',
+            search_string: '@ViewData["SearchQuery"]',
+            num_items: @(Model?.Count() ?? 0)
+        });
+    });
+</script>
+}

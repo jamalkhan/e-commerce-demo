@@ -1,0 +1,30 @@
+@model List<MvcApp.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <ul>
+    @foreach (var product in Model)
+    {
+        <li style="margin-bottom: 20px;">
+            <h3>@product.Name</h3>
+            <p>@product.Description</p>
+            <p><strong>Price:</strong> $@product.Price</p>
+            <!-- Link to Product Details page -->
+            <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="btn btn-sm btn-primary">
+                View Details
+            </a>
+        </li>
+    }
+    </ul>
+}
+
+<a href="/">Back to Home</a>

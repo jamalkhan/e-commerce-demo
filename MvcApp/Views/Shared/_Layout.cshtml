@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MvcApp</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MvcApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <script type="text/javascript">
+        // Create a global Promise immediately
+        window._zyncReady = new Promise(function(resolve) {
+            window._resolveZync = resolve;
+        });
+
+        function zync_call() {
+            var z = document.createElement("script");
+            var gpp="${GPP_STRING_469}";
+            var gpp_sid="${GPP_SID}";
+            var gdpr="${GDPR}";
+            var gdpr_consent="${GDPR_CONSENT_469}";
+            var zmpID="jamal-sandbox";
+            var cache_buster=Date.now();
+            var PageUrl=encodeURIComponent(window.top.location.href)
+                .replace(/[!'()~]/g, escape)
+                .replace(/\*/g, "%2A");
+
+            var z_src = "https://live.rezync.com/sync?c=16b6410431b6374e780104abb0443ca8" +
+                "&p=5deb58601478522abf27c7b293ff1b3a" +
+                "&k=jamal-sandbox-pixel-7288" +
+                "&gpp=" + gpp +
+                "&gpp_sid=" + gpp_sid +
+                "&gdpr=" + gdpr +
+                "&gdpr_consent=" + gdpr_consent +
+                "&zmpID=" + zmpID +
+                "&cache_buster=" + cache_buster +
+                "&PageUrl=" + PageUrl;
+
+            z.src = z_src;
+            z.async = true;
+
+            z.onload = function() {
+                if (window._resolveZync) {
+                    window._resolveZync(); // resolve the promise
+                }
+            };
+
+            document.body.appendChild(z);
+        }
+
+        // Run on DOM ready
+        if (['complete', 'interactive'].indexOf(document.readyState) >= 0) {
+            zync_call();
+        } else {
+            window.addEventListener("DOMContentLoaded", zync_call);
+        }
+    </script>
+   <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MvcApp</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - MvcApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

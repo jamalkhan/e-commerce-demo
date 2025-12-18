@@ -1,0 +1,66 @@
+# Build artifacts
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+.vscode/
+
+# Rider
+.idea/
+
+# ASP.NET temporary files
+wwwroot/lib/
+appsettings.*.json
+
+# NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Visual Studio cache/options
+*.VC.db
+*.VC.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Publish output
+publish/
+*.deploy
+
+# Node/npm (if using frontend tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Resharper
+_ReSharper*/
+*.ReSharper
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# Entity Framework
+*.dbmdl
+*.bak
+*.mdf
+*.ldf
+
+# Others
+*.pidb
+*.svclog
+*.pdb
+*.cache
