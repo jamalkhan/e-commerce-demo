@@ -28,3 +28,15 @@ else
 }
 
 <a href="/">Back to Home</a>
+
+@section Scripts {
+<script type="text/javascript">
+    // Wait for Zync script to finish loading
+    window._zyncReady.then(function() {
+        bt('track', 'page_view', {
+            content_type: 'product_list',
+            num_items: @(Model?.Count() ?? 0)
+        });
+    });
+</script>
+}

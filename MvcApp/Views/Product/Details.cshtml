@@ -10,11 +10,13 @@
     <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">Back to Products</a>
     
     <script type="text/javascript">
-        _bt('track', 'viewedProduct', {
-            value: @Model.Price,
-            currency: 'USD',
-            content_ids: ['@Model.Id'],
-            content_type: 'product'
+        window._zyncReady.then(function() {
+            bt('track', 'viewedProduct', {
+                value: @Model.Price,
+                currency: 'USD',
+                content_ids: ['@Model.Id'],
+                content_type: 'product'
+            });
         });
     </script>
 </div>

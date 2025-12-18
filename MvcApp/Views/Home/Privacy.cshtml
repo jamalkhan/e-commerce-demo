@@ -4,3 +4,14 @@
 <h1>@ViewData["Title"]</h1>
 
 <p>Use this page to detail your site's privacy policy.</p>
+
+@section Scripts {
+<script type="text/javascript">
+    // Wait for Zync script to finish loading
+    window._zyncReady.then(function() {
+        bt('track', 'page_view', {
+            content_type: 'privacy_policy'
+        });
+    });
+</script>
+}
