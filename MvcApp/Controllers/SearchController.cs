@@ -16,10 +16,10 @@ public class SearchController : Controller
     }
 
        public IActionResult Index(string q)
-        {
-            var products = ProductStore.Products.Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
-            if (products == null || products.Count() == 0)
-                return View("NotFound");
-            return View(products);
-        }
+    {
+        var products = ProductStore.Products.Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
+        if (products == null || products.Count() == 0)
+            return View("NotFound");
+        return View(products);
     }
+}

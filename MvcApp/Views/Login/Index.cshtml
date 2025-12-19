@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Logged In";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+
+    <p>You have successfully logged in.</p>
+
+    <p>@Context.Request.Query["uname"]</p>
+</div>
+
+
+@section Scripts {
+<script type="text/javascript">
+    // Wait for Zync script to finish loading
+    window._zyncReady.then(function() {
+        bt('updateUser',
+        {
+            user_id: '@Context.Request.Query["uname"]'
+        }, 
+        {onComplete: function() 
+            { console.log('User Update Completed!'); }
+        }
+        
+        );
+    });
+</script>
+}

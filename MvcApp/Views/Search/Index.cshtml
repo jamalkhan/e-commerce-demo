@@ -33,7 +33,7 @@ else
     window._zyncReady.then(function() {
         bt('track', 'searched', {
             content_type: 'product',
-            search_string: '@ViewData["SearchQuery"]',
+            search_string: '@Context.Request.Query["q"]',
             num_items: @(Model?.Count() ?? 0)
         });
     });

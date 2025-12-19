@@ -11,6 +11,12 @@ public static class ProductStore
             Name: "Demo Smart Water Bottle",
             Description: "Tracks hydration and syncs with your phone.",
             Price: 49.99m
+        ),
+        new Product(
+            Id: 1,
+            Name: "Another Smart Water Bottle",
+            Description: "Tracks hydration and syncs with your phone.",
+            Price: 49.99m
         )
     };
 }
