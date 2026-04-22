@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MvcApp.Models;
 using MvcApp.Data;
 using System.Data.Common;
+using System.Linq;
 
 namespace MvcApp.Controllers;
 
@@ -15,11 +16,19 @@ public class SearchController : Controller
         _logger = logger;
     }
 
-       public IActionResult Index(string q)
+       public IActionResult Index(string? q)
     {
-        var products = ProductStore.Products.Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
-        if (products == null || products.Count() == 0)
-            return View("NotFound");
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            ViewData["Message"] = "Enter a product name to search.";
+            return View(Enumerable.Empty<Product>());
+        }
+
+        var products = ProductStore.Products
+            .Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        ViewData["Query"] = q;
         return View(products);
     }
 }

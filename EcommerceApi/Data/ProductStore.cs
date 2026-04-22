@@ -1,6 +1,6 @@
-using MvcApp.Models;
+using EcommerceApi.Models;
 
-namespace MvcApp.Data;
+namespace EcommerceApi.Data;
 
 public static class ProductStore
 {
