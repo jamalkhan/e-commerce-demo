@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace MvcApp.Controllers;
+namespace EcommerceMvc.Controllers;
 
 public class LoginController : Controller
 {

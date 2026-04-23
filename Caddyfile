@@ -1,0 +1,23 @@
+sandbox.jamal.com {
+	tls internal
+	reverse_proxy http://localhost:5112
+}
+
+sandbox.spa.jamal.com {
+	tls internal
+	reverse_proxy http://localhost:5173
+}
+
+sandbox.api.jamal.com {
+	tls internal
+	reverse_proxy http://localhost:5056
+}
+
+sandbox.dashboard.jamal.com {
+	tls internal
+	reverse_proxy https://localhost:17134 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}

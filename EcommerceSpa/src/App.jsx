@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "https://sandbox.api.jamal.com";
+const apiBaseUrl = __API_BASE_URL__;
 
 function normalizePath(pathname) {
   return pathname.replace(/\/+$/, "") || "/";

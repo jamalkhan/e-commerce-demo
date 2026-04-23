@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MvcApp.Models;
-using MvcApp.Data;
+using EcommerceMvc.Models;
+using EcommerceMvc.Data;
 using System.Data.Common;
 using System.Linq;
 
-namespace MvcApp.Controllers;
+namespace EcommerceMvc.Controllers;
 
 public class SearchController : Controller
 {

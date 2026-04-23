@@ -17,7 +17,9 @@ builder.Services.AddCors(options =>
             return;
         }
 
-        policy.WithOrigins(allowedOrigins)
+        policy.SetIsOriginAllowed(origin =>
+            allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase) ||
+            (builder.Environment.IsDevelopment() && IsLocalDevelopmentOrigin(origin)))
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -86,4 +88,16 @@ static IResult Login(string? userName)
     return Results.Ok(new LoginResponse(
         UserName: userName.Trim(),
         Message: "You have successfully logged in."));
+}
+
+static bool IsLocalDevelopmentOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    return uri.Scheme is "http" or "https" &&
+        (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+         uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase));
 }

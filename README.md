@@ -12,7 +12,7 @@ On Mac, add the following to /etc/hosts
 
 ### dotnet
 
-MvcApp is a simple dotnet (9) Web / Mvc App that serves the web content on http://localhost:5112
+EcommerceMvc is a simple dotnet (10) Web / Mvc App that serves the web content on http://localhost:5112
 
 ### Caddy
 
@@ -24,7 +24,7 @@ For Mac users...
 
 brew install caddy
 
-Then run caddy using the included Caddyfile.
+Then run caddy using the repo-root `Caddyfile`.
 
 Caddy uses a local CA.
 
@@ -53,9 +53,23 @@ Run the following two processes concurrently (likely from two separate terminals
 dotnet run
 sudo caddy run
 
+## Aspire AppHost
+
+For the cleanest local orchestration, run the Aspire AppHost instead:
+
+dotnet run --project EcommerceAppHost/EcommerceAppHost.csproj
+
+This starts:
+
+- EcommerceApi
+- EcommerceMvc
+- EcommerceSpa (via the Vite dev server)
+
+The AppHost gives you a single dashboard to inspect endpoints, logs, and startup order. You no longer need EcommerceMvc to manually launch EcommerceApi.
+
 ## Notes
 
-This mirrors a production deployment, is cross platform compatible (sorry instructions here are for Mac only...). Both Caddy and MvcApp should run on Windows and Linux, but i've not tested it.
+This mirrors a production deployment, is cross platform compatible (sorry instructions here are for Mac only...). Both Caddy and EcommerceMvc should run on Windows and Linux, but i've not tested it.
 
 choco install caddy
 

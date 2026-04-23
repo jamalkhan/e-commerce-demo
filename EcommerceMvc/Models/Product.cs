@@ -1,4 +1,4 @@
-namespace MvcApp.Models;
+namespace EcommerceMvc.Models;
 
 public record Product(
     int Id,

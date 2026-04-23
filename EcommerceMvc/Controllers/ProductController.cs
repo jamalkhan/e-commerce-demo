@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MvcApp.Models;
-using MvcApp.Data;
+using EcommerceMvc.Models;
+using EcommerceMvc.Data;
 
-namespace MvcApp.Controllers;
+namespace EcommerceMvc.Controllers;
 
 public class ProductController : Controller
 {
