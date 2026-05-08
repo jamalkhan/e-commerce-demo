@@ -2,21 +2,45 @@
 
 ## Prerequisites
 
-You need dotnet and Caddy. You'll also need to create an alias to sandbox.jamal.com
+You need dotnet and Caddy. You'll also need to map the three sandbox hostnames to localhost in your hosts file.
 
-### alias
+### Hosts file
 
-On Mac, add the following to /etc/hosts
+The demo uses three hostnames, all routed locally through Caddy:
 
-127.0.0.1   sandbox.jamal.com
+| Hostname | Service | Local port |
+| --- | --- | --- |
+| sandbox.api.jamal.com | EcommerceApi | 5111 |
+| sandbox.mvc.jamal.com | EcommerceMvc | 5112 |
+| sandbox.spa.jamal.com | EcommerceSpa  | 5113 |
+
+#### macOS / Linux
+
+Add the following line to `/etc/hosts` (requires sudo):
+
+```
+127.0.0.1   sandbox.api.jamal.com sandbox.mvc.jamal.com sandbox.spa.jamal.com
+```
+
+#### Windows
+
+Edit `C:\Windows\System32\drivers\etc\hosts` as Administrator and add the same line:
+
+```
+127.0.0.1   sandbox.api.jamal.com sandbox.mvc.jamal.com sandbox.spa.jamal.com
+```
+
+> Note: the hosts file does not support wildcards on either OS. If you start adding many subdomains, look at `dnsmasq` + `/etc/resolver/jamal.com` on macOS, or Acrylic DNS Proxy on Windows for wildcard support.
 
 ### dotnet
 
-EcommerceMvc is a simple dotnet (10) Web / Mvc App that serves the web content on http://localhost:5112
+- EcommerceApi listens on http://localhost:5111
+- EcommerceMvc listens on http://localhost:5112
+- EcommerceSpa (Vite dev server) listens on http://localhost:5113
 
 ### Caddy
 
-Caddy is a proxy server. The dotnet Kestral server is configured to listen on http \ 5112. Caddy, listens on https://sandbox.jamal.com:443 and forwards traffic to http://localhost:5112
+Caddy is a proxy server fronting all three apps with HTTPS. Each `sandbox.*.jamal.com` host listens on `:443` and forwards to the matching local port above.
 
 https://caddyserver.com/docs/install
 
