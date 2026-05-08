@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="EcommerceMaui.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:EcommerceMaui.Views"
+    Title="EcommerceMaui">
+
+    <TabBar>
+        <ShellContent Title="Home"
+                      Route="home"
+                      ContentTemplate="{DataTemplate views:HomePage}" />
+        <ShellContent Title="Products"
+                      Route="products"
+                      ContentTemplate="{DataTemplate views:ProductsPage}" />
+        <ShellContent Title="Privacy"
+                      Route="privacy"
+                      ContentTemplate="{DataTemplate views:PrivacyPage}" />
+    </TabBar>
+
+</Shell>

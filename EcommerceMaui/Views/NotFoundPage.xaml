@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EcommerceMaui.ViewModels"
+             x:Class="EcommerceMaui.Views.NotFoundPage"
+             x:DataType="vm:NotFoundViewModel"
+             Title="{Binding Title}">
+
+    <VerticalStackLayout Padding="24" Spacing="16"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center">
+        <Label Text="404"
+               FontSize="48"
+               FontAttributes="Bold"
+               HorizontalOptions="Center" />
+        <Label Text="The page you're looking for doesn't exist."
+               FontSize="16"
+               HorizontalOptions="Center" />
+        <Button Text="Back to Home"
+                Command="{Binding HomeCommand}" />
+    </VerticalStackLayout>
+</ContentPage>

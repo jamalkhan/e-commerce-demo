@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EcommerceMaui.ViewModels"
+             x:Class="EcommerceMaui.Views.HomePage"
+             x:DataType="vm:HomeViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
+
+            <Label Text="EcommerceMaui"
+                   FontSize="32"
+                   FontAttributes="Bold" />
+
+            <Label Text="Browse the catalog, run a quick search, or sign in."
+                   FontSize="16"
+                   TextColor="{AppThemeBinding Light=#555555, Dark=#BBBBBB}" />
+
+            <Border Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                    StrokeThickness="1"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Search products" FontAttributes="Bold" FontSize="18" />
+                    <Entry Placeholder="Product name"
+                           Text="{Binding SearchQuery, Mode=TwoWay}"
+                           ReturnCommand="{Binding SearchCommand}" />
+                    <Button Text="Search" Command="{Binding SearchCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                    StrokeThickness="1"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Log in" FontAttributes="Bold" FontSize="18" />
+                    <Entry Placeholder="Username"
+                           Text="{Binding UserName, Mode=TwoWay}"
+                           ReturnCommand="{Binding LoginCommand}" />
+                    <Button Text="Log In" Command="{Binding LoginCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

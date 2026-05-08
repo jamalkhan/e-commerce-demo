@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EcommerceMaui.ViewModels"
+             x:Class="EcommerceMaui.Views.PrivacyPage"
+             x:DataType="vm:PrivacyViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+            <Label Text="Privacy Policy"
+                   FontSize="28"
+                   FontAttributes="Bold" />
+            <Label Text="This is a demo application. No personal data is collected, stored, or shared. Login is for demonstration purposes only and does not authenticate against a real identity provider."
+                   FontSize="16" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
