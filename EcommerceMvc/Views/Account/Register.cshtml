@@ -1,0 +1,31 @@
+@model EcommerceMvc.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Create account";
+}
+
+<h1>Create an account</h1>
+
+<form asp-action="Register" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" autocomplete="name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create account</button>
+    <a asp-action="Login" class="btn btn-link">Already have an account?</a>
+</form>

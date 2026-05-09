@@ -9,6 +9,9 @@ public static class EcommerceDataServiceCollectionExtensions
     public static IServiceCollection AddEcommerceDataRepositories(this IServiceCollection services)
     {
         services.AddScoped<IProductRepository, EfProductRepository>();
+        services.AddScoped<IUserRepository, EfUserRepository>();
+        services.AddScoped<ISessionRepository, EfSessionRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, EfPasswordResetTokenRepository>();
         services.AddScoped<ProductSeeder>();
         return services;
     }

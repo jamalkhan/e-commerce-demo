@@ -2,9 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EcommerceData.SqlServer\EcommerceData.SqlServer.csproj" />
+    <ProjectReference Include="..\EcommerceMail\EcommerceMail.csproj" />
+    <ProjectReference Include="..\EcommerceMail.Smtp\EcommerceMail.Smtp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

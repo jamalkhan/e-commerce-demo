@@ -13,8 +13,8 @@ Check items off as they ship. Promote items to actual work by carving a vertical
 Nothing else matters until this is in place; today there's an in-memory `ProductStore` and login is a `?uname=` query string.
 
 - [x] Real product database (Postgres / SQL Server) — persistent products, categories, inventory, prices
-- [ ] Real authentication — password hashing, sessions or JWTs, password reset, OAuth (Google / Apple / Microsoft)
-- [ ] Persisted user accounts (id, email, profile)
+- [x] Real authentication — password hashing (PBKDF2 via `PasswordHasher<User>`), 30-min sliding sessions, password reset, Google + Facebook OAuth wiring (Apple/Microsoft TBD)
+- [x] Persisted user accounts (id, email, profile)
 - [ ] Environment-based config (dev / staging / prod) and secrets management
 
 ## Phase 1 — Catalog & discovery

@@ -4,6 +4,10 @@
     <ProjectReference Include="..\EcommerceData.SqlServer\EcommerceData.SqlServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="bleak.Api.Rest" Version="2.3.22" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>EcommerceMvc</AssemblyName>

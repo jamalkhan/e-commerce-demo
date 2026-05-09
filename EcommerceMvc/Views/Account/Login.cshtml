@@ -1,0 +1,36 @@
+@model EcommerceMvc.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Log in";
+    var apiBaseUrl = (ViewData["ApiBaseUrl"] as string) ?? "";
+    var oauthReturnUrl = $"{Url.Action("OAuthCallback", "Account", null, Context.Request.Scheme)}";
+}
+
+<h1>Log in</h1>
+
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Log in</button>
+    <a asp-action="ForgotPassword" class="btn btn-link">I forgot my password</a>
+    <a asp-action="Register" class="btn btn-link">Create an account</a>
+</form>
+
+@if (!string.IsNullOrEmpty(apiBaseUrl))
+{
+    <hr />
+    <p>Or sign in with:</p>
+    <a class="btn btn-outline-secondary" href="@($"{apiBaseUrl}/api/auth/oauth/google?returnUrl={Uri.EscapeDataString(oauthReturnUrl)}")">Google</a>
+    <a class="btn btn-outline-secondary" href="@($"{apiBaseUrl}/api/auth/oauth/facebook?returnUrl={Uri.EscapeDataString(oauthReturnUrl)}")">Facebook</a>
+}

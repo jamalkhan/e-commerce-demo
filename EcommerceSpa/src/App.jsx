@@ -2,6 +2,41 @@ import { useEffect, useMemo, useState } from "react";
 
 const apiBaseUrl = __API_BASE_URL__;
 
+const SESSION_STORAGE_KEY = "ecommerce_session";
+
+function loadSession() {
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(session) {
+  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+  window.dispatchEvent(new Event("ecommerce-session-changed"));
+}
+
+function clearSession() {
+  window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.dispatchEvent(new Event("ecommerce-session-changed"));
+}
+
+function useSession() {
+  const [session, setSession] = useState(loadSession());
+  useEffect(() => {
+    const handle = () => setSession(loadSession());
+    window.addEventListener("ecommerce-session-changed", handle);
+    window.addEventListener("storage", handle);
+    return () => {
+      window.removeEventListener("ecommerce-session-changed", handle);
+      window.removeEventListener("storage", handle);
+    };
+  }, []);
+  return session;
+}
+
 function normalizePath(pathname) {
   return pathname.replace(/\/+$/, "") || "/";
 }
@@ -14,11 +49,17 @@ function parseLocation() {
 }
 
 async function apiRequest(path, options = {}) {
+  const session = loadSession();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers ?? {})
+  };
+  if (session?.token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${session.token}`;
+  }
+
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {})
-    },
+    headers,
     ...options
   });
 
@@ -74,6 +115,19 @@ function Link({ href, className, children }) {
 }
 
 function AppShell({ children }) {
+  const session = useSession();
+
+  const handleLogout = async (event) => {
+    event.preventDefault();
+    try {
+      await apiRequest("/api/auth/logout", { method: "POST" });
+    } catch {
+      // best-effort
+    }
+    clearSession();
+    navigate("/");
+  };
+
   return (
     <div className="page-shell">
       <header className="site-header">
@@ -83,6 +137,19 @@ function AppShell({ children }) {
             <Link href="/">Home</Link>
             <Link href="/products">Products</Link>
             <Link href="/privacy">Privacy</Link>
+          </nav>
+          <nav className="auth-nav">
+            {session ? (
+              <>
+                <span>{session.user?.name}</span>
+                <a href="#" onClick={handleLogout}>Log out</a>
+              </>
+            ) : (
+              <>
+                <Link href="/login">Log in</Link>
+                <Link href="/register">Sign up</Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -134,7 +201,6 @@ function usePageTitle(title) {
 function HomePage() {
   usePageTitle("Home");
 
-  const [userName, setUserName] = useState("");
   const [query, setQuery] = useState("");
 
   return (
@@ -149,22 +215,10 @@ function HomePage() {
       </div>
       <div className="panel-grid">
         <section className="panel">
-          <h2>Log In</h2>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              navigate(`/login?uname=${encodeURIComponent(userName)}`);
-            }}
-          >
-            <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              value={userName}
-              onChange={(event) => setUserName(event.target.value)}
-              placeholder="Login"
-            />
-            <button className="button" type="submit">Log In</button>
-          </form>
+          <h2>Sign in</h2>
+          <p>Manage your account and orders.</p>
+          <Link href="/login" className="button">Log in</Link>
+          <Link href="/register" className="button secondary">Create account</Link>
         </section>
         <section className="panel">
           <h2>Search Products</h2>
@@ -380,51 +434,140 @@ function SearchPage({ searchParams }) {
   );
 }
 
-function LoginPage({ searchParams }) {
-  const userName = searchParams.get("uname") ?? "";
-
+function LoginPage() {
   usePageTitle("Login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const [state, setState] = useState({
-    loading: true,
-    error: "",
-    payload: null
-  });
-
-  useEffect(() => {
-    let active = true;
-
-    apiRequest("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ userName })
-    })
-      .then((payload) => {
-        if (active) {
-          setState({ loading: false, error: "", payload });
-        }
-      })
-      .catch((error) => {
-        if (active) {
-          setState({ loading: false, error: error.message, payload: null });
-        }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const session = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password })
       });
+      saveSession(session);
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Could not log in.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-    return () => {
-      active = false;
-    };
-  }, [userName]);
+  const oauthReturn = `${window.location.origin}/oauth-callback`;
 
-  if (state.loading) {
-    return <StatusCard title="Logging in" message="Contacting EcommerceApi." />;
-  }
+  return (
+    <section className="panel prose">
+      <p className="eyebrow">Account</p>
+      <h1>Log in</h1>
+      {error ? <p className="info-banner">{error}</p> : null}
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" autoComplete="email" required
+          value={email} onChange={(e) => setEmail(e.target.value)} />
+        <label htmlFor="password">Password</label>
+        <input id="password" type="password" autoComplete="current-password" required
+          value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="button" type="submit" disabled={submitting}>
+          {submitting ? "Logging in..." : "Log in"}
+        </button>
+      </form>
+      <p>
+        <Link href="/forgot-password">Forgot your password?</Link>
+        {" · "}
+        <Link href="/register">Create an account</Link>
+      </p>
+      <hr />
+      <p>Or sign in with:</p>
+      <a className="button secondary"
+         href={`${apiBaseUrl}/api/auth/oauth/google?returnUrl=${encodeURIComponent(oauthReturn)}`}>Google</a>
+      <a className="button secondary"
+         href={`${apiBaseUrl}/api/auth/oauth/facebook?returnUrl=${encodeURIComponent(oauthReturn)}`}>Facebook</a>
+    </section>
+  );
+}
 
-  if (state.error || !state.payload) {
+function RegisterPage() {
+  usePageTitle("Sign up");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const session = await apiRequest("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email, name, password })
+      });
+      saveSession(session);
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Could not create account.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="panel prose">
+      <p className="eyebrow">Account</p>
+      <h1>Create an account</h1>
+      {error ? <p className="info-banner">{error}</p> : null}
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" autoComplete="email" required
+          value={email} onChange={(e) => setEmail(e.target.value)} />
+        <label htmlFor="name">Name</label>
+        <input id="name" type="text" autoComplete="name" required
+          value={name} onChange={(e) => setName(e.target.value)} />
+        <label htmlFor="password">Password (min 8 characters)</label>
+        <input id="password" type="password" autoComplete="new-password" required minLength={8}
+          value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="button" type="submit" disabled={submitting}>
+          {submitting ? "Creating..." : "Create account"}
+        </button>
+      </form>
+      <p><Link href="/login">Already have an account?</Link></p>
+    </section>
+  );
+}
+
+function ForgotPasswordPage() {
+  usePageTitle("Forgot password");
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      await apiRequest("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email })
+      });
+    } catch {
+      // intentional: do not reveal whether the email exists
+    } finally {
+      setSubmitted(true);
+    }
+  };
+
+  if (submitted) {
     return (
       <StatusCard
-        title="Login unavailable"
-        message={state.error || "We couldn't complete the login request."}
-        actionHref="/"
-        actionLabel="Back Home"
+        title="Check your email"
+        message="If that email is registered, a reset link is on its way. The link expires in one hour."
+        actionHref="/login"
+        actionLabel="Back to login"
       />
     );
   }
@@ -432,12 +575,119 @@ function LoginPage({ searchParams }) {
   return (
     <section className="panel prose">
       <p className="eyebrow">Account</p>
-      <h1>Welcome</h1>
-      <p>{state.payload.message}</p>
-      <p><strong>{state.payload.userName}</strong></p>
-      <Link href="/" className="button secondary">Back Home</Link>
+      <h1>Forgot your password?</h1>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" autoComplete="email" required
+          value={email} onChange={(e) => setEmail(e.target.value)} />
+        <button className="button" type="submit">Send reset link</button>
+      </form>
+      <p><Link href="/login">Back to login</Link></p>
     </section>
   );
+}
+
+function ResetPasswordPage({ searchParams }) {
+  usePageTitle("Reset password");
+  const initialToken = searchParams.get("token") ?? "";
+  const [token, setToken] = useState(initialToken);
+  const [newPassword, setNewPassword] = useState("");
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      await apiRequest("/api/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword })
+      });
+      setDone(true);
+    } catch (err) {
+      setError(err.message || "Could not reset password.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <StatusCard
+        title="Password updated"
+        message="Your password has been reset. You can now log in."
+        actionHref="/login"
+        actionLabel="Log in"
+      />
+    );
+  }
+
+  return (
+    <section className="panel prose">
+      <p className="eyebrow">Account</p>
+      <h1>Choose a new password</h1>
+      {error ? <p className="info-banner">{error}</p> : null}
+      <form onSubmit={handleSubmit}>
+        <input type="hidden" value={token} onChange={(e) => setToken(e.target.value)} />
+        <label htmlFor="newPassword">New password (min 8 characters)</label>
+        <input id="newPassword" type="password" autoComplete="new-password" required minLength={8}
+          value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+        <button className="button" type="submit" disabled={submitting}>
+          {submitting ? "Saving..." : "Save new password"}
+        </button>
+      </form>
+    </section>
+  );
+}
+
+function OAuthCallbackPage({ searchParams }) {
+  usePageTitle("Signing you in");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) {
+      setError("OAuth sign-in did not return a session token.");
+      return;
+    }
+
+    let cancelled = false;
+    apiRequest("/api/auth/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((user) => {
+        if (cancelled) return;
+        saveSession({
+          token,
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          user
+        });
+        navigate("/");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err.message || "Failed to complete OAuth sign-in.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
+
+  if (error) {
+    return (
+      <StatusCard
+        title="OAuth sign-in failed"
+        message={error}
+        actionHref="/login"
+        actionLabel="Back to login"
+      />
+    );
+  }
+
+  return <StatusCard title="Signing you in" message="Completing OAuth sign-in." />;
 }
 
 function NotFoundPage() {
@@ -490,7 +740,23 @@ export default function App() {
     }
 
     if (location.pathname === "/login") {
-      return <LoginPage searchParams={location.searchParams} />;
+      return <LoginPage />;
+    }
+
+    if (location.pathname === "/register") {
+      return <RegisterPage />;
+    }
+
+    if (location.pathname === "/forgot-password") {
+      return <ForgotPasswordPage />;
+    }
+
+    if (location.pathname === "/reset-password") {
+      return <ResetPasswordPage searchParams={location.searchParams} />;
+    }
+
+    if (location.pathname === "/oauth-callback") {
+      return <OAuthCallbackPage searchParams={location.searchParams} />;
     }
 
     return <NotFoundPage />;

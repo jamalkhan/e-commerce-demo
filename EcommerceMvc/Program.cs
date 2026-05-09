@@ -1,6 +1,8 @@
+using bleak.Api.Rest;
 using EcommerceData.Data;
 using EcommerceData.Seeding;
 using EcommerceData.SqlServer.DependencyInjection;
+using EcommerceMvc.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,10 @@ switch (dbProvider)
         throw new InvalidOperationException(
             $"Database provider '{dbProvider}' is not supported. Add a provider package and update Program.cs.");
 }
+
+builder.Services.Configure<EcommerceApiOptions>(builder.Configuration.GetSection("EcommerceApi"));
+builder.Services.AddSingleton<RestClient>();
+builder.Services.AddScoped<IAuthApiClient, AuthApiClient>();
 
 var app = builder.Build();
 

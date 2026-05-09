@@ -1,4 +1,6 @@
+using EcommerceApi.Services;
 using EcommerceData.Repositories;
+using EcommerceMail;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +10,11 @@ namespace EcommerceApi.Tests;
 
 public class EcommerceApiFactory : WebApplicationFactory<Program>
 {
-    public IProductRepository ProductRepository { get; }
+    public IProductRepository? ProductRepository { get; set; }
+    public IAuthenticationService? AuthenticationService { get; set; }
+    public IEmailSender? EmailSender { get; set; }
+
+    public EcommerceApiFactory() { }
 
     public EcommerceApiFactory(IProductRepository productRepository)
     {
@@ -21,11 +27,28 @@ public class EcommerceApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Database:Provider", "SqlServer");
         builder.UseSetting("ConnectionStrings:EcommerceDb",
             "Server=test;Database=test;User Id=sa;Password=test;TrustServerCertificate=True;");
+        builder.UseSetting("Smtp:Host", "localhost");
+        builder.UseSetting("Smtp:Port", "25");
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IProductRepository>();
-            services.AddSingleton(ProductRepository);
+            if (ProductRepository is not null)
+            {
+                services.RemoveAll<IProductRepository>();
+                services.AddSingleton(ProductRepository);
+            }
+
+            if (AuthenticationService is not null)
+            {
+                services.RemoveAll<IAuthenticationService>();
+                services.AddSingleton(AuthenticationService);
+            }
+
+            if (EmailSender is not null)
+            {
+                services.RemoveAll<IEmailSender>();
+                services.AddSingleton(EmailSender);
+            }
         });
     }
 }

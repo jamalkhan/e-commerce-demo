@@ -1,9 +1,21 @@
+using EcommerceApi.Authentication;
+using EcommerceApi.Endpoints;
 using EcommerceApi.Models;
 using EcommerceData.Data;
+using EcommerceData.Entities;
 using EcommerceData.Repositories;
 using EcommerceData.Seeding;
 using EcommerceData.SqlServer.DependencyInjection;
+using EcommerceMail.Smtp.DependencyInjection;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using EcommerceApi.Services;
+using IAuthenticationService = EcommerceApi.Services.IAuthenticationService;
+using AuthenticationService = EcommerceApi.Services.AuthenticationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +37,8 @@ builder.Services.AddCors(options =>
             allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase) ||
             (builder.Environment.IsDevelopment() && IsLocalDevelopmentOrigin(origin)))
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -45,6 +58,58 @@ switch (dbProvider)
             $"Database provider '{dbProvider}' is not supported. Add a provider package and update Program.cs.");
 }
 
+builder.Services.AddSmtpEmail(builder.Configuration.GetSection("Smtp"));
+
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddSingleton<ISecureTokenGenerator, SecureTokenGenerator>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+var oauth = builder.Configuration.GetSection("OAuth").Get<OAuthOptions>() ?? new OAuthOptions();
+
+var authBuilder = builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = SessionAuthenticationHandler.SchemeName;
+    options.DefaultChallengeScheme = SessionAuthenticationHandler.SchemeName;
+})
+    .AddScheme<SessionAuthenticationOptions, SessionAuthenticationHandler>(
+        SessionAuthenticationHandler.SchemeName, _ => { })
+    .AddCookie(OAuthEndpoints.ExternalCookieScheme, options =>
+    {
+        options.Cookie.Name = "external_oauth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    });
+
+if (!string.IsNullOrWhiteSpace(oauth.Google?.ClientId) && !string.IsNullOrWhiteSpace(oauth.Google.ClientSecret))
+{
+    authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+    {
+        options.ClientId = oauth.Google.ClientId!;
+        options.ClientSecret = oauth.Google.ClientSecret!;
+        options.SignInScheme = OAuthEndpoints.ExternalCookieScheme;
+        options.Scope.Add("email");
+        options.Scope.Add("profile");
+    });
+}
+
+if (!string.IsNullOrWhiteSpace(oauth.Facebook?.ClientId) && !string.IsNullOrWhiteSpace(oauth.Facebook.ClientSecret))
+{
+    authBuilder.AddFacebook(FacebookDefaults.AuthenticationScheme, options =>
+    {
+        options.AppId = oauth.Facebook.ClientId!;
+        options.AppSecret = oauth.Facebook.ClientSecret!;
+        options.SignInScheme = OAuthEndpoints.ExternalCookieScheme;
+        options.Scope.Add("email");
+        options.Fields.Add("name");
+        options.Fields.Add("email");
+    });
+}
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 app.UseCors("SpaClient");
@@ -57,6 +122,9 @@ if (app.Environment.IsDevelopment())
     var seeder = scope.ServiceProvider.GetRequiredService<ProductSeeder>();
     await seeder.SeedAsync();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 
@@ -93,8 +161,13 @@ app.MapGet("/api/search", async (string? q, IProductRepository repo) =>
     return Results.Ok(new SearchResponse(query, message, dtos));
 });
 
+// Legacy username-only login. Kept for backwards compatibility with existing apps until they
+// migrate to /api/auth/login. Does not authenticate against the user store.
 app.MapPost("/api/login", (LoginRequest request) => Login(request.UserName));
 app.MapGet("/api/login", (string? uname) => Login(uname));
+
+app.MapAuthEndpoints();
+app.MapOAuthEndpoints();
 
 app.Run();
 
