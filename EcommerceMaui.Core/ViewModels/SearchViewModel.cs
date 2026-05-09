@@ -5,16 +5,17 @@ using EcommerceMaui.Services;
 
 namespace EcommerceMaui.ViewModels;
 
-[QueryProperty(nameof(Query), "q")]
 public class SearchViewModel : BaseViewModel
 {
     private readonly IEcommerceApiClient _api;
+    private readonly INavigationService _navigation;
     private string _query = string.Empty;
     private string? _resultsMessage;
 
-    public SearchViewModel(IEcommerceApiClient api)
+    public SearchViewModel(IEcommerceApiClient api, INavigationService navigation)
     {
         _api = api;
+        _navigation = navigation;
         Title = "Search";
         Results = new ObservableCollection<Product>();
         ViewDetailsCommand = new RelayCommand<Product>(ViewDetailsAsync);
@@ -44,7 +45,7 @@ public class SearchViewModel : BaseViewModel
     public ICommand ViewDetailsCommand { get; }
     public ICommand BackCommand { get; }
 
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         if (IsBusy) return;
 
@@ -75,11 +76,8 @@ public class SearchViewModel : BaseViewModel
     private async Task ViewDetailsAsync(Product? product)
     {
         if (product is null) return;
-        await Shell.Current.GoToAsync($"product?id={product.Id}");
+        await _navigation.GoToAsync($"product?id={product.Id}");
     }
 
-    private static async Task BackAsync()
-    {
-        await Shell.Current.GoToAsync("..");
-    }
+    private Task BackAsync() => _navigation.GoBackAsync();
 }

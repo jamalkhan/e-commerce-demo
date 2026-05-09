@@ -21,6 +21,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<RestClient>();
         builder.Services.AddSingleton<IEcommerceApiClient, EcommerceApiClient>();
+        builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
 
         builder.Services.AddSingleton<AppShell>();
 

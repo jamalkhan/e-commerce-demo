@@ -8,10 +8,12 @@ namespace EcommerceMaui.ViewModels;
 public class ProductsViewModel : BaseViewModel
 {
     private readonly IEcommerceApiClient _api;
+    private readonly INavigationService _navigation;
 
-    public ProductsViewModel(IEcommerceApiClient api)
+    public ProductsViewModel(IEcommerceApiClient api, INavigationService navigation)
     {
         _api = api;
+        _navigation = navigation;
         Title = "Products";
         Products = new ObservableCollection<Product>();
         LoadCommand = new RelayCommand(LoadAsync);
@@ -52,6 +54,6 @@ public class ProductsViewModel : BaseViewModel
     private async Task ViewDetailsAsync(Product? product)
     {
         if (product is null) return;
-        await Shell.Current.GoToAsync($"product?id={product.Id}");
+        await _navigation.GoToAsync($"product?id={product.Id}");
     }
 }

@@ -1,19 +1,20 @@
 using System.Windows.Input;
+using EcommerceMaui.Services;
 
 namespace EcommerceMaui.ViewModels;
 
 public class NotFoundViewModel : BaseViewModel
 {
-    public NotFoundViewModel()
+    private readonly INavigationService _navigation;
+
+    public NotFoundViewModel(INavigationService navigation)
     {
+        _navigation = navigation;
         Title = "Not Found";
         HomeCommand = new RelayCommand(HomeAsync);
     }
 
     public ICommand HomeCommand { get; }
 
-    private static async Task HomeAsync()
-    {
-        await Shell.Current.GoToAsync("//home");
-    }
+    private Task HomeAsync() => _navigation.GoHomeAsync();
 }

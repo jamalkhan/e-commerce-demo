@@ -3,16 +3,17 @@ using EcommerceMaui.Services;
 
 namespace EcommerceMaui.ViewModels;
 
-[QueryProperty(nameof(UserName), "uname")]
 public class LoginViewModel : BaseViewModel
 {
     private readonly IEcommerceApiClient _api;
+    private readonly INavigationService _navigation;
     private string _userName = string.Empty;
     private string? _welcomeMessage;
 
-    public LoginViewModel(IEcommerceApiClient api)
+    public LoginViewModel(IEcommerceApiClient api, INavigationService navigation)
     {
         _api = api;
+        _navigation = navigation;
         Title = "Login";
         BackCommand = new RelayCommand(BackAsync);
     }
@@ -37,7 +38,7 @@ public class LoginViewModel : BaseViewModel
 
     public ICommand BackCommand { get; }
 
-    private async Task LoginAsync()
+    public async Task LoginAsync()
     {
         if (IsBusy || string.IsNullOrWhiteSpace(UserName)) return;
 
@@ -61,8 +62,5 @@ public class LoginViewModel : BaseViewModel
         }
     }
 
-    private static async Task BackAsync()
-    {
-        await Shell.Current.GoToAsync("//home");
-    }
+    private Task BackAsync() => _navigation.GoHomeAsync();
 }

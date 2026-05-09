@@ -4,17 +4,18 @@ using EcommerceMaui.Services;
 
 namespace EcommerceMaui.ViewModels;
 
-[QueryProperty(nameof(Id), "id")]
 public class ProductDetailsViewModel : BaseViewModel
 {
     private readonly IEcommerceApiClient _api;
+    private readonly INavigationService _navigation;
     private int _id;
     private Product? _product;
     private bool _notFound;
 
-    public ProductDetailsViewModel(IEcommerceApiClient api)
+    public ProductDetailsViewModel(IEcommerceApiClient api, INavigationService navigation)
     {
         _api = api;
+        _navigation = navigation;
         Title = "Product Details";
         BackCommand = new RelayCommand(BackAsync);
     }
@@ -45,7 +46,7 @@ public class ProductDetailsViewModel : BaseViewModel
 
     public ICommand BackCommand { get; }
 
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         if (IsBusy) return;
 
@@ -76,8 +77,5 @@ public class ProductDetailsViewModel : BaseViewModel
         }
     }
 
-    private static async Task BackAsync()
-    {
-        await Shell.Current.GoToAsync("..");
-    }
+    private Task BackAsync() => _navigation.GoBackAsync();
 }

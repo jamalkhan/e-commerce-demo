@@ -1,14 +1,17 @@
 using System.Windows.Input;
+using EcommerceMaui.Services;
 
 namespace EcommerceMaui.ViewModels;
 
 public class HomeViewModel : BaseViewModel
 {
+    private readonly INavigationService _navigation;
     private string _searchQuery = string.Empty;
     private string _userName = string.Empty;
 
-    public HomeViewModel()
+    public HomeViewModel(INavigationService navigation)
     {
+        _navigation = navigation;
         Title = "Home";
         SearchCommand = new RelayCommand(SearchAsync, () => !string.IsNullOrWhiteSpace(SearchQuery));
         LoginCommand = new RelayCommand(LoginAsync, () => !string.IsNullOrWhiteSpace(UserName));
@@ -45,13 +48,13 @@ public class HomeViewModel : BaseViewModel
     {
         var q = SearchQuery.Trim();
         if (string.IsNullOrEmpty(q)) return;
-        await Shell.Current.GoToAsync($"search?q={Uri.EscapeDataString(q)}");
+        await _navigation.GoToAsync($"search?q={Uri.EscapeDataString(q)}");
     }
 
     private async Task LoginAsync()
     {
         var name = UserName.Trim();
         if (string.IsNullOrEmpty(name)) return;
-        await Shell.Current.GoToAsync($"login?uname={Uri.EscapeDataString(name)}");
+        await _navigation.GoToAsync($"login?uname={Uri.EscapeDataString(name)}");
     }
 }
