@@ -17,6 +17,7 @@ out/
 # ASP.NET temporary files
 wwwroot/lib/
 appsettings.*.json
+!appsettings.*.example.json
 
 # NuGet packages
 *.nupkg

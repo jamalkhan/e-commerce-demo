@@ -70,6 +70,34 @@ Why Caddy is nice...
 📦 Single config file (Caddyfile)
 🧠 Sensible defaults (no TLS pain like nginx)
 
+### Database (SQL Server in Docker)
+
+The API persists products in SQL Server, run locally via Docker. From the repo root:
+
+```
+docker compose up -d                # starts ecommerce-sqlserver on :1433
+docker compose down                 # stops (data persists in the named volume)
+docker compose down -v              # nuke the data
+```
+
+The dev SA password is `Ecommerce_Demo!2026` and matches what the API reads from `appsettings.Development.json`.
+
+First-time setup:
+
+```
+cp EcommerceApi/appsettings.Development.example.json EcommerceApi/appsettings.Development.json
+```
+
+(`appsettings.Development.json` is gitignored — keep your local connection strings there.)
+
+The repository pattern is provider-agnostic. Swap providers via `appsettings.json`:
+
+```
+"Database": { "Provider": "SqlServer" }
+```
+
+Future providers (Postgres, MySQL, …) plug in as separate `EcommerceData.<Provider>` projects.
+
 ## Running
 
 Run the following two processes concurrently (likely from two separate terminals)

@@ -1,3 +1,5 @@
+using EcommerceData.Entities;
+
 namespace EcommerceApi.Models;
 
 public record ProductDto(
