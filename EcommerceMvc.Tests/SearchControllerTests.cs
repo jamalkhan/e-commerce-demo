@@ -1,19 +1,20 @@
+using EcommerceData.Repositories;
 using EcommerceMvc.Controllers;
-using EcommerceMvc.Data;
 using EcommerceMvc.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Entities = EcommerceData.Entities;
 using Xunit;
 
 namespace EcommerceMvc.Tests;
 
 public class SearchControllerTests
 {
-    private static SearchController CreateController()
+    private static SearchController CreateController(IProductRepository repo)
     {
-        var controller = new SearchController(Substitute.For<ILogger<SearchController>>());
+        var controller = new SearchController(Substitute.For<ILogger<SearchController>>(), repo);
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext()
@@ -25,53 +26,62 @@ public class SearchControllerTests
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public void Index_with_blank_query_returns_empty_results_with_message(string? query)
+    public async Task Index_with_blank_query_returns_empty_results_with_message(string? query)
     {
-        var controller = CreateController();
+        var repo = Substitute.For<IProductRepository>();
+        var controller = CreateController(repo);
 
-        var result = Assert.IsType<ViewResult>(controller.Index(query));
+        var result = Assert.IsType<ViewResult>(await controller.Index(query));
         var model = Assert.IsAssignableFrom<IEnumerable<Product>>(result.Model);
 
         Assert.Empty(model);
         Assert.Equal("Enter a product name to search.", controller.ViewData["Message"]);
+        await repo.DidNotReceive().SearchByNameAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public void Index_returns_filtered_products_for_partial_match()
+    public async Task Index_with_query_calls_repository_and_returns_matches()
     {
-        var controller = CreateController();
-        var expectedMatches = ProductStore.Products
-            .Where(p => p.Name.Contains("Smart", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        var repo = Substitute.For<IProductRepository>();
+        repo.SearchByNameAsync("Smart", Arg.Any<CancellationToken>())
+            .Returns(new List<Entities.Product>
+            {
+                new() { Id = 1, Name = "Smart Widget", Description = "d", Price = 1m }
+            });
+        var controller = CreateController(repo);
 
-        var result = Assert.IsType<ViewResult>(controller.Index("Smart"));
+        var result = Assert.IsType<ViewResult>(await controller.Index("Smart"));
         var model = Assert.IsAssignableFrom<IEnumerable<Product>>(result.Model);
 
-        Assert.Equal(expectedMatches.Count, model.Count());
+        Assert.Single(model);
         Assert.Equal("Smart", controller.ViewData["Query"]);
     }
 
     [Fact]
-    public void Index_search_is_case_insensitive()
+    public async Task Index_returns_empty_model_when_repository_returns_no_matches()
     {
-        var controller = CreateController();
+        var repo = Substitute.For<IProductRepository>();
+        repo.SearchByNameAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Entities.Product>());
+        var controller = CreateController(repo);
 
-        var lower = ((ViewResult)controller.Index("smart")).Model as IEnumerable<Product>;
-        var upper = ((ViewResult)controller.Index("SMART")).Model as IEnumerable<Product>;
-
-        Assert.NotNull(lower);
-        Assert.NotNull(upper);
-        Assert.Equal(lower!.Count(), upper!.Count());
-    }
-
-    [Fact]
-    public void Index_returns_empty_result_when_no_match()
-    {
-        var controller = CreateController();
-
-        var result = Assert.IsType<ViewResult>(controller.Index("ZzNoMatchZz"));
+        var result = Assert.IsType<ViewResult>(await controller.Index("Nothing"));
         var model = Assert.IsAssignableFrom<IEnumerable<Product>>(result.Model);
 
         Assert.Empty(model);
+        Assert.Equal("Nothing", controller.ViewData["Query"]);
+    }
+
+    [Fact]
+    public async Task Index_passes_query_through_to_repository_unchanged()
+    {
+        var repo = Substitute.For<IProductRepository>();
+        repo.SearchByNameAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Entities.Product>());
+        var controller = CreateController(repo);
+
+        await controller.Index("smart");
+
+        await repo.Received(1).SearchByNameAsync("smart", Arg.Any<CancellationToken>());
     }
 }

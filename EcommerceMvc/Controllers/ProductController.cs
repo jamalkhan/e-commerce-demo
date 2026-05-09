@@ -1,27 +1,35 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+using EcommerceData.Repositories;
 using EcommerceMvc.Models;
-using EcommerceMvc.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceMvc.Controllers;
 
 public class ProductController : Controller
 {
-    // GET /Product
-    public IActionResult Index()
+    private readonly IProductRepository _products;
+
+    public ProductController(IProductRepository products)
     {
-        // Return the full list of products
-        var products = ProductStore.Products;
-        return View(products);
+        _products = products;
+    }
+
+    // GET /Product
+    public async Task<IActionResult> Index()
+    {
+        var entities = await _products.GetAllAsync();
+        var view = entities
+            .Select(p => new Product(p.Id, p.Name, p.Description, p.Price))
+            .ToList();
+        return View(view);
     }
 
     // GET /Product/Details/{id}
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Details(int id)
     {
-        var product = ProductStore.Products.FirstOrDefault(p => p.Id == id);
-        if (product == null)
-            return View("NotFound"); // Use your NotFound view
+        var entity = await _products.GetByIdAsync(id);
+        if (entity is null)
+            return View("NotFound");
 
-        return View(product);
+        return View(new Product(entity.Id, entity.Name, entity.Description, entity.Price));
     }
 }

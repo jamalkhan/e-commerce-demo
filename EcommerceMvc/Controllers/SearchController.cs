@@ -1,22 +1,21 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+using EcommerceData.Repositories;
 using EcommerceMvc.Models;
-using EcommerceMvc.Data;
-using System.Data.Common;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceMvc.Controllers;
 
 public class SearchController : Controller
 {
     private readonly ILogger<SearchController> _logger;
+    private readonly IProductRepository _products;
 
-    public SearchController(ILogger<SearchController> logger)
+    public SearchController(ILogger<SearchController> logger, IProductRepository products)
     {
         _logger = logger;
+        _products = products;
     }
 
-       public IActionResult Index(string? q)
+    public async Task<IActionResult> Index(string? q)
     {
         if (string.IsNullOrWhiteSpace(q))
         {
@@ -24,11 +23,12 @@ public class SearchController : Controller
             return View(Enumerable.Empty<Product>());
         }
 
-        var products = ProductStore.Products
-            .Where(p => p.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
+        var entities = await _products.SearchByNameAsync(q);
+        var view = entities
+            .Select(p => new Product(p.Id, p.Name, p.Description, p.Price))
             .ToList();
 
         ViewData["Query"] = q;
-        return View(products);
+        return View(view);
     }
 }
